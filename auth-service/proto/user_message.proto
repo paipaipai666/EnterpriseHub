@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./internal/pb;pb";
+
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
+message GetUserResponse {
+  string id = 1;
+  string username = 2;
+  string password = 3;
+}
+
+/// UserService provides user management functionality
+service UserService {
+  /// GetUserByUsername retrieves a user by their username
+  rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserResponse);
+}

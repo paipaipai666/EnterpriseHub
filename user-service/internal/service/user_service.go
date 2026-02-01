@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/paipaipai666/EnterpriseHub/user-service/internal/model"
 	dto "github.com/paipaipai666/EnterpriseHub/user-service/internal/model/dto"
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/repository"
 	"gorm.io/gorm"
@@ -8,7 +9,7 @@ import (
 
 type UserService interface {
 	SignUp(param *dto.UserDTO) *gorm.DB
-	Login(param *dto.LoginDTO) string
+	GetUserByUsername(username string) *model.User
 }
 
 type userServiceImpl struct {
@@ -25,11 +26,8 @@ func (usi *userServiceImpl) SignUp(param *dto.UserDTO) *gorm.DB {
 	return usi.repo.CreateUser(param.Username, param.Password, param.Email)
 }
 
-func (usi *userServiceImpl) Login(param *dto.LoginDTO) string {
-	user := usi.repo.FindByParam(param.Username, param.Password)
-	if user == nil {
-		return ""
-	}
+func (usi *userServiceImpl) GetUserByUsername(username string) *model.User {
+	user := usi.repo.FindByUsername(username)
 
-	return user.Id
+	return user
 }

@@ -8,7 +8,6 @@ import (
 
 type UserController interface {
 	SignUp(ctx *gin.Context)
-	Login(ctx *gin.Context)
 }
 
 type userControllerImpl struct {
@@ -44,32 +43,5 @@ func (uci *userControllerImpl) SignUp(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"message": "success",
 		"data":    "user_id",
-	})
-}
-
-func (uci *userControllerImpl) Login(ctx *gin.Context) {
-	loginData := &dto.LoginDTO{}
-
-	err := ctx.ShouldBindJSON(&loginData)
-	if err != nil {
-		ctx.JSON(400, gin.H{
-			"message": "failed",
-			"data":    err.Error(),
-		})
-		return
-	}
-
-	id := uci.service.Login(loginData)
-	if id == "" {
-		ctx.JSON(500, gin.H{
-			"message": "failed",
-			"data":    "用户名或密码错误",
-		})
-		return
-	}
-
-	ctx.JSON(200, gin.H{
-		"message": "success",
-		"data":    id,
 	})
 }

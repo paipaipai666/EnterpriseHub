@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./internal/pb;pb";
+
+// 用户服务，提供用户查询相关的RPC接口
+service UserService {
+  // 根据用户ID获取用户信息
+  rpc GetUserById(GetUserByIdRequest) returns (UserResponse);
+  // 根据用户名获取用户信息
+  rpc GetUserByUsername(GetUserByUsernameRequest) returns (UserResponse);
+}
+
+// 根据用户ID查询请求
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+// 根据用户名查询请求
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
+// 用户响应消息
+message UserResponse {
+  string id = 1;
+  string username = 2;
+  string password = 3; // 仅内部使用
+}

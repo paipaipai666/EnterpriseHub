@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	CreateUser(username, password, email string) *gorm.DB
 	FindByParam(username, password string) *model.User
+	FindByUsername(username string) *model.User
 	FindById(id string) *model.User
 	UpdateUser(id, username, password, email string) *gorm.DB
 }
@@ -34,6 +35,13 @@ func (uri *userRepositoryImpl) CreateUser(username, password, email string) *gor
 func (uri *userRepositoryImpl) FindByParam(username, password string) *model.User {
 	user := &model.User{}
 	initializers.DB.Where(&model.User{Username: username, Password: password}).First(&user)
+
+	return user
+}
+
+func (uri *userRepositoryImpl) FindByUsername(username string) *model.User {
+	user := &model.User{}
+	initializers.DB.Where(&model.User{Username: username}).First(&user)
 
 	return user
 }
