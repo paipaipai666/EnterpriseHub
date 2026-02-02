@@ -26,15 +26,26 @@ func JWTAuth(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := c.Cookie("token")
-	if err != nil {
-		c.JSON(401, gin.H{
+	authHeader := c.GetHeader("Authorization")
+
+	if authHeader == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "failed",
-			"data":    "Unauthorized",
+			"data":    "Authorization header missing",
 		})
-		c.Abort()
 		return
 	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "failed",
+			"data":    "Authorization header format must be Bearer {token}",
+		})
+		return
+	}
+
+	tokenString := parts[1]
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")

@@ -1,33 +1,33 @@
 package service
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"os"
-	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/gin-gonic/gin"
 	"github.com/paipaipai666/EnterpriseHub/auth-service/internal/client"
 )
 
 var hmacSampleSecret = []byte(os.Getenv("SECRET_KEY"))
 
 type AuthService interface {
-	LoginWithJWT(ctx context.Context, username, password string) (string, error)
+	LoginWithJWT(ctx *gin.Context, username, password string) (string, error)
+	Logout(ctx *gin.Context) error
 }
 
 type authServiceImpl struct {
-	userClient client.UserClient
+	userClient   client.UserClient
+	tokenChecker UserTokenService
 }
 
-func NewAuthService(userClient client.UserClient) AuthService {
+func NewAuthService(userClient client.UserClient, tokenChecker UserTokenService) AuthService {
 	return &authServiceImpl{
-		userClient: userClient,
+		userClient:   userClient,
+		tokenChecker: tokenChecker,
 	}
 }
 
-func (asi *authServiceImpl) LoginWithJWT(ctx context.Context, username, password string) (string, error) {
+func (asi *authServiceImpl) LoginWithJWT(ctx *gin.Context, username, password string) (string, error) {
 	user, err := asi.userClient.GetUserByUsername(ctx, username)
 	if err != nil {
 		return "", err
@@ -37,24 +37,22 @@ func (asi *authServiceImpl) LoginWithJWT(ctx context.Context, username, password
 		return "", errors.New("invalid password")
 	}
 
-	token, err := asi.GenerateJWT(username)
+	err = asi.tokenChecker.TokenExists(username, ctx)
 	if err != nil {
 		return "", err
 	}
+
+	token, err := asi.tokenChecker.GenerateJWT(username)
+	if err != nil {
+		return "", err
+	}
+
+	asi.tokenChecker.SaveToken(username, token, ctx)
 	return token, nil
 }
 
-func (asi *authServiceImpl) GenerateJWT(username string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": username,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(),
-		"iat":      time.Now().Unix(),
-	})
+func (asi *authServiceImpl) Logout(ctx *gin.Context) error {
+	err := asi.tokenChecker.DeleteToken(ctx)
 
-	tokenString, err := token.SignedString(hmacSampleSecret)
-	if err != nil {
-		fmt.Println("Error signing token:", err)
-		return "", err
-	}
-	return tokenString, nil
+	return err
 }

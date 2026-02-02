@@ -5,10 +5,13 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/paipaipai666/EnterpriseHub/gateway-service/middleware"
 )
 
 func main() {
 	router := gin.Default()
+
+	router.Use(middleware.JWTAuth)
 
 	userServiceURL, _ := url.Parse("http://localhost:8000/api/v1/users")
 	authServiceURL, _ := url.Parse("http://localhost:9000/api/v1/auth")

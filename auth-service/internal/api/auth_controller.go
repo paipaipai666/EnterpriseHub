@@ -8,6 +8,7 @@ import (
 
 type AuthController interface {
 	LoginWithJWT(c *gin.Context)
+	Logout(c *gin.Context)
 }
 
 type authControllerImpl struct {
@@ -28,6 +29,7 @@ func (aci *authControllerImpl) LoginWithJWT(c *gin.Context) {
 			"data":    "invalid params:" + err.Error(),
 		})
 	}
+
 	token, err := aci.service.LoginWithJWT(c, loginRequest.Username, loginRequest.Password)
 	if err != nil {
 		c.JSON(401, gin.H{
@@ -40,5 +42,20 @@ func (aci *authControllerImpl) LoginWithJWT(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "success",
 		"data":    token,
+	})
+}
+
+func (aci *authControllerImpl) Logout(c *gin.Context) {
+	err := aci.service.Logout(c)
+	if err != nil {
+		c.JSON(401, gin.H{
+			"message": "failed",
+			"error":   err.Error(),
+		})
+		return
+	}
+	c.JSON(200, gin.H{
+		"message": "success",
+		"data":    "你已安全退出",
 	})
 }
