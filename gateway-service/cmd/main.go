@@ -5,27 +5,26 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
-	"github.com/paipaipai666/EnterpriseHub/gateway-service/middleware"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
 
-	// JWT 校验中间件
-	r.Use(middleware.JWTAuth)
+	userServiceURL, _ := url.Parse("http://localhost:8000/api/v1/users")
+	authServiceURL, _ := url.Parse("http://localhost:9000/api/v1/auth")
 
-	// 路由转发
-	r.Any("/api/users/*path", proxy("http://user-service:8000"))
-	r.Any("/api/auth/*path", proxy("http://auth-service:9000"))
+	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
+	authProxy := httputil.NewSingleHostReverseProxy(authServiceURL)
 
-	r.Run(":8080")
-}
+	router.Any("/api/v1/users/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		userProxy.ServeHTTP(c.Writer, c.Request)
+	})
 
-func proxy(target string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		remote, _ := url.Parse(target)
-		proxy := httputil.NewSingleHostReverseProxy(remote)
+	router.Any("/api/v1/auth/*path", func(c *gin.Context) {
+		c.Request.URL.Path = c.Param("path")
+		authProxy.ServeHTTP(c.Writer, c.Request)
+	})
 
-		proxy.ServeHTTP(c.Writer, c.Request)
-	}
+	router.Run(":8080")
 }

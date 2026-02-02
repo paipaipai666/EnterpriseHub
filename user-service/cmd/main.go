@@ -53,7 +53,7 @@ func startHttpServer() {
 
 	apiRoutes := router.Group("/api/v1")
 	{
-		apiRoutes.POST("/register", userController.SignUp)
+		apiRoutes.POST("/users/register", userController.SignUp)
 	}
 
 	router.Run(":8000")

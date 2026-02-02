@@ -27,7 +27,10 @@ func main() {
 
 	router := gin.Default()
 
-	router.POST("api/v1/auth", authController.LoginWithJWT)
+	apiRoutes := router.Group("/api/v1")
+	{
+		apiRoutes.POST("/auth/login", authController.LoginWithJWT)
+	}
 
 	router.Run(":9000")
 }

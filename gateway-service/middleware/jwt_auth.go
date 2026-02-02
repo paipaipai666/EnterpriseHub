@@ -14,8 +14,8 @@ import (
 var hmacSampleSecret = []byte(os.Getenv("SECRET_KEY"))
 
 var publicPaths = []string{
-	"/api/auth/login",
-	"/api/users/register",
+	"/api/v1/auth/login",
+	"/api/v1/users/register",
 }
 
 func JWTAuth(c *gin.Context) {
@@ -25,6 +25,7 @@ func JWTAuth(c *gin.Context) {
 		c.Next()
 		return
 	}
+
 	tokenString, err := c.Cookie("token")
 	if err != nil {
 		c.JSON(401, gin.H{
