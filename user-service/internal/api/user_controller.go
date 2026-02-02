@@ -8,6 +8,8 @@ import (
 
 type UserController interface {
 	SignUp(ctx *gin.Context)
+	FindUserById(ctx *gin.Context)
+	FindAllUser(ctx *gin.Context)
 }
 
 type userControllerImpl struct {
@@ -38,10 +40,46 @@ func (uci *userControllerImpl) SignUp(ctx *gin.Context) {
 			"message": "failed",
 			"data":    result.Error.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(200, gin.H{
 		"message": "success",
 		"data":    "user_id",
+	})
+}
+
+func (uci *userControllerImpl) FindUserById(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	user := uci.service.GetUserById(id)
+
+	if user == nil {
+		ctx.JSON(500, gin.H{
+			"message": "failed",
+			"data":    id,
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "success",
+		"data":    user,
+	})
+}
+
+func (uci *userControllerImpl) FindAllUser(ctx *gin.Context) {
+	users, err := uci.service.GetAllUser()
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"message": "failed",
+			"data":    err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "success",
+		"data":    users,
 	})
 }

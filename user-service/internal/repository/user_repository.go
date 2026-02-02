@@ -12,6 +12,7 @@ type UserRepository interface {
 	FindByParam(username, password string) *model.User
 	FindByUsername(username string) *model.User
 	FindById(id string) *model.User
+	FindAll() ([]model.User, *gorm.DB)
 	UpdateUser(id, username, password, email string) *gorm.DB
 }
 
@@ -72,4 +73,11 @@ func (uri *userRepositoryImpl) UpdateUser(id, username, password, email string) 
 	}
 
 	return initializers.DB.Model(&user).Where("id = ?", id).Updates(updates)
+}
+
+func (uri *userRepositoryImpl) FindAll() ([]model.User, *gorm.DB) {
+	var users []model.User
+	result := initializers.DB.Find(&users)
+
+	return users, result
 }
