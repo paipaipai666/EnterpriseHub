@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./internal/pb;pb";
+
+import "enum_message.proto";
+
+message CreatePaymentRequest {
+  string order_id = 1; // 业务订单号
+  double amount = 2; // 支付金额（单位：分）
+  PaymentMethod method = 3; // 支付方式
+  string currency = 4; // 币种（如 CNY）
+  string user_id = 5; // 支付用户
+}
+
+message CreatePaymentResponse {
+  string payment_id = 1; // 支付单号
+  PaymentStatus status = 2; // 初始状态（一般是 PENDING）
+  int64 created_at = 3; // 创建时间（时间戳）
+}

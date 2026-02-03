@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./internal/pb;pb";
+
+import "pay_message.proto";
+import "payment_message.proto";
+import "query_message.proto";
+
+// 支付服务定义
+service PaymentService {
+  // 创建支付订单
+  // 输入：CreatePaymentRequest - 创建支付请求参数
+  // 输出：CreatePaymentResponse - 创建支付响应结果
+  rpc CreatePayment(CreatePaymentRequest)
+      returns (CreatePaymentResponse);
+
+  // 执行支付操作
+  // 输入：PayRequest - 支付请求参数  
+  // 输出：PayResponse - 支付响应结果
+  rpc Pay(PayRequest)
+      returns (PayResponse);
+
+  // 查询支付状态
+  // 输入：QueryPaymentRequest - 查询支付请求参数
+  // 输出：QueryPaymentResponse - 查询支付响应结果
+  rpc QueryPayment(QueryPaymentRequest)
+      returns (QueryPaymentResponse);
+}

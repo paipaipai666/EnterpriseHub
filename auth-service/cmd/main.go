@@ -19,7 +19,7 @@ func init() {
 }
 
 func main() {
-	serverAddress := "0.0.0.0:9001"
+	serverAddress := "0.0.0.0:8001"
 
 	conn, err := grpc.NewClient(serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

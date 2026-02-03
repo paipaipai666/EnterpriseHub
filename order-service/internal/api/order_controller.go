@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/domain/dto"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/service"
@@ -8,6 +10,7 @@ import (
 
 type OrderController interface {
 	CreateOrder(ctx *gin.Context)
+	PayForOrder(ctx *gin.Context)
 	GetOrderById(ctx *gin.Context)
 	GetOrderList(ctx *gin.Context)
 	CancelOrder(ctx *gin.Context)
@@ -47,6 +50,35 @@ func (oci *orderControllerImpl) CreateOrder(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"message": "success",
 		"data":    orderId,
+	})
+}
+
+func (oci *orderControllerImpl) PayForOrder(ctx *gin.Context) {
+	method := &dto.PaymentDTO{}
+	orderId := ctx.Param("id")
+
+	err := ctx.ShouldBindJSON(&method)
+	if err != nil {
+		ctx.JSON(400, gin.H{
+			"message": "failed1",
+			"data":    err.Error(),
+		})
+		return
+	}
+
+	fmt.Println(method.Method.ToMethod())
+	id, err := oci.service.Pay(ctx, method.Method.ToMethod(), orderId)
+	if err != nil {
+		ctx.JSON(400, gin.H{
+			"message": "failed",
+			"data":    err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "success",
+		"data":    id,
 	})
 }
 

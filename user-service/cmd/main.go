@@ -36,7 +36,7 @@ func startGrpcServer() {
 	grpcServer := grpc.NewServer()
 	pb.RegisterUserServiceServer(grpcServer, &userGrpcHandler)
 
-	address := "0.0.0.0:9001"
+	address := "0.0.0.0:8001"
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatal("cannot start server:", err)

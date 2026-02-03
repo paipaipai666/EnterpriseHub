@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "./internal/pb;pb";
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_PENDING = 1; // 已创建，待支付
+  PAYMENT_SUCCESS = 2; // 支付成功
+  PAYMENT_FAILED  = 3; // 支付失败
+  PAYMENT_CLOSED  = 4; // 已关闭/超时
+}
+
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  PAYMENT_METHOD_ALIPAY = 1;
+  PAYMENT_METHOD_WECHAT = 2;
+  PAYMENT_METHOD_BALANCE = 3; // 内部余额/模拟
+}

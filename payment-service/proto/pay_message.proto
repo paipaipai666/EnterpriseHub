@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "./internal/pb;pb";
+
+import "enum_message.proto";
+
+message PayRequest {
+  string payment_id = 1; // 支付单号
+  string request_id = 2; // 幂等ID（防重复支付）
+}
+
+message PayResponse {
+  PaymentStatus status = 1; // 支付结果
+  string transaction_id = 2; // 第三方交易号（可为空）
+  int64 paid_at = 3; // 支付完成时间
+}
