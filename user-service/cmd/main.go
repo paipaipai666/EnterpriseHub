@@ -51,13 +51,13 @@ func startGrpcServer() {
 func startHttpServer() {
 	router := gin.Default()
 
-	apiRoutes := router.Group("/api/v1")
+	apiRoutes := router.Group("/api/v1/users")
 	{
-		apiRoutes.POST("/users/register", userController.SignUp)
+		apiRoutes.POST("/register", userController.SignUp)
 
-		apiRoutes.GET("/users/get/:id", userController.FindUserById)
+		apiRoutes.GET("/get/:id", userController.FindUserById)
 
-		apiRoutes.GET("/users/get_all", userController.FindAllUser)
+		apiRoutes.GET("/get_all", userController.FindAllUser)
 	}
 
 	router.Run(":8000")
