@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/paipaipai666/EnterpriseHub/order-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/client"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/domain"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/mq"
@@ -86,6 +87,10 @@ func (osi *orderServiceImpl) Pay(ctx *gin.Context, method int, orderId string) (
 		return "", errors.New("未知支付错误！")
 	}
 	order.Status = domain.OrderStatusPaid
+	err = initializers.DB.Save(&order).Error
+	if err != nil {
+		return "", err
+	}
 
 	mq.PublishOrderPaid(order)
 
@@ -115,7 +120,10 @@ func (osi *orderServiceImpl) Cancel(id string) error {
 	if err != nil {
 		return err
 	}
-	order.Cancel()
+	err = order.Cancel()
+	if err != nil {
+		return err
+	}
 
 	err = osi.repo.Updata(order)
 	return err
