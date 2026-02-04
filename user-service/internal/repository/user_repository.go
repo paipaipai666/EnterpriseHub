@@ -4,16 +4,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/paipaipai666/EnterpriseHub/user-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/model"
-	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	CreateUser(username, password, email string) *gorm.DB
+	CreateUser(username, password, email string) (string, error)
 	FindByParam(username, password string) *model.User
-	FindByUsername(username string) *model.User
+	FindByUsername(username string) (*model.User, error)
 	FindById(id string) *model.User
-	FindAll() ([]model.User, *gorm.DB)
-	UpdateUser(id, username, password, email string) *gorm.DB
+	FindAll() ([]model.User, error)
+	UpdateUser(id, username, password, email string) error
 }
 
 type userRepositoryImpl struct{}
@@ -22,7 +21,7 @@ func NewUserRepository() UserRepository {
 	return &userRepositoryImpl{}
 }
 
-func (uri *userRepositoryImpl) CreateUser(username, password, email string) *gorm.DB {
+func (uri *userRepositoryImpl) CreateUser(username, password, email string) (string, error) {
 	newUser := &model.User{
 		Id:       uuid.New().String(),
 		Username: username,
@@ -30,7 +29,11 @@ func (uri *userRepositoryImpl) CreateUser(username, password, email string) *gor
 		Email:    email,
 	}
 
-	return initializers.DB.Create(&newUser)
+	err := initializers.DB.Create(&newUser).Error
+	if err != nil {
+		return "", err
+	}
+	return newUser.Id, nil
 }
 
 func (uri *userRepositoryImpl) FindByParam(username, password string) *model.User {
@@ -40,11 +43,14 @@ func (uri *userRepositoryImpl) FindByParam(username, password string) *model.Use
 	return user
 }
 
-func (uri *userRepositoryImpl) FindByUsername(username string) *model.User {
+func (uri *userRepositoryImpl) FindByUsername(username string) (*model.User, error) {
 	user := &model.User{}
-	initializers.DB.Where(&model.User{Username: username}).First(&user)
+	err := initializers.DB.Where(&model.User{Username: username}).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
 
-	return user
+	return user, nil
 }
 
 func (uri *userRepositoryImpl) FindById(id string) *model.User {
@@ -54,7 +60,7 @@ func (uri *userRepositoryImpl) FindById(id string) *model.User {
 	return user
 }
 
-func (uri *userRepositoryImpl) UpdateUser(id, username, password, email string) *gorm.DB {
+func (uri *userRepositoryImpl) UpdateUser(id, username, password, email string) error {
 	user := &model.User{}
 	var updates = make(map[string]interface{})
 
@@ -69,15 +75,18 @@ func (uri *userRepositoryImpl) UpdateUser(id, username, password, email string) 
 	}
 
 	if len(updates) == 0 {
-		return initializers.DB.Limit(0) // 返回一个不会执行任何操作的查询
+		return initializers.DB.Limit(0).Error // 返回一个不会执行任何操作的查询
 	}
 
-	return initializers.DB.Model(&user).Where("id = ?", id).Updates(updates)
+	return initializers.DB.Model(&user).Where("id = ?", id).Updates(updates).Error
 }
 
-func (uri *userRepositoryImpl) FindAll() ([]model.User, *gorm.DB) {
+func (uri *userRepositoryImpl) FindAll() ([]model.User, error) {
 	var users []model.User
-	result := initializers.DB.Find(&users)
+	err := initializers.DB.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
 
-	return users, result
+	return users, nil
 }

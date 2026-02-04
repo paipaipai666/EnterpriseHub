@@ -34,18 +34,18 @@ func (uci *userControllerImpl) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	result := uci.service.SignUp(singUpData)
-	if result.Error != nil {
+	userId, err := uci.service.SignUp(singUpData)
+	if err != nil {
 		ctx.JSON(500, gin.H{
 			"message": "failed",
-			"data":    result.Error.Error(),
+			"data":    err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
 		"message": "success",
-		"data":    "user_id",
+		"data":    userId,
 	})
 }
 

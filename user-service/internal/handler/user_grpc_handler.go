@@ -17,7 +17,10 @@ func NewUserGrpcHandler(repo repository.UserRepository) *UserGrpcHandler {
 }
 
 func (ugh *UserGrpcHandler) GetUserByUsername(ctx context.Context, req *pb.GetUserByUsernameRequest) (*pb.UserResponse, error) {
-	user := ugh.repo.FindByUsername(req.Username)
+	user, err := ugh.repo.FindByUsername(req.Username)
+	if err != nil {
+		return nil, err
+	}
 
 	return &pb.UserResponse{
 		Id:       user.Id,
