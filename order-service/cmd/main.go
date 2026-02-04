@@ -17,6 +17,7 @@ import (
 func init() {
 	initializers.LoadEnv()
 	initializers.ConnectToDatabase()
+	initializers.ConnectToRabbitMQ()
 }
 
 func main() {

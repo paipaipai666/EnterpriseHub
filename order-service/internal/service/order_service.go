@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/client"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/domain"
+	"github.com/paipaipai666/EnterpriseHub/order-service/internal/mq"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/repository"
 )
 
@@ -42,6 +43,8 @@ func (osi *orderServiceImpl) CreateOrder(userId string, amount float64) (string,
 	if err != nil {
 		return "", err
 	}
+
+	mq.PublishOrderCreated(order)
 
 	return order.Id, nil
 }
@@ -82,6 +85,10 @@ func (osi *orderServiceImpl) Pay(ctx *gin.Context, method int, orderId string) (
 	case 0:
 		return "", errors.New("未知支付错误！")
 	}
+	order.Status = domain.OrderStatusPaid
+
+	mq.PublishOrderPaid(order)
+
 	return paymentRes.PaymentId, nil
 }
 

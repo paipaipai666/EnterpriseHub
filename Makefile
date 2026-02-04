@@ -10,5 +10,8 @@ order_service:
 payment_service:
 	cd payment-service && go run cmd/main.go
 
+notify_service:
+	cd notify-service && go run cmd/main.go
+
 gateway:
 	cd gateway-service && go run cmd/main.go
