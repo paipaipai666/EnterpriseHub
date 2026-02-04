@@ -1,10 +1,10 @@
 package initializers
 
 import (
-	"log"
 	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.uber.org/zap"
 )
 
 var Conn *amqp.Connection
@@ -16,12 +16,12 @@ func ConnectToRabbitMQ() {
 	var err error
 	Conn, err = amqp.Dial(url)
 	if err != nil {
-		log.Fatal("RabbitMQ 连接失败: " + err.Error())
+		Log.Fatal("RabbitMQ 连接失败: ", zap.Error(err))
 	}
 
 	Channel, err = Conn.Channel()
 	if err != nil {
-		log.Fatal("RabbitMQ 通道创建失败: " + err.Error())
+		Log.Fatal("RabbitMQ 通道创建失败: ", zap.Error(err))
 	}
 
 	// 声明 exchange 和 queue

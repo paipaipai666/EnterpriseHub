@@ -5,17 +5,33 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/paipaipai666/EnterpriseHub/gateway-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/gateway-service/middleware"
+	"go.uber.org/zap"
 )
+
+func init() {
+	initializers.LoadEnv()
+	initializers.InitLogger("gateway")
+}
 
 func main() {
 	router := gin.Default()
 
 	router.Use(middleware.JWTAuth)
 
-	userServiceURL, _ := url.Parse("http://localhost:8000/api/v1/users")
-	authServiceURL, _ := url.Parse("http://localhost:9000/api/v1/auth")
-	orderServiceURL, _ := url.Parse("http://localhost:10000/api/v1/order")
+	userServiceURL, err := url.Parse("http://localhost:8000/api/v1/users")
+	if err != nil {
+		initializers.Log.Fatal("can not parse user service url : ", zap.Error(err))
+	}
+	authServiceURL, err := url.Parse("http://localhost:9000/api/v1/auth")
+	if err != nil {
+		initializers.Log.Fatal("can not parse auth service url : ", zap.Error(err))
+	}
+	orderServiceURL, err := url.Parse("http://localhost:10000/api/v1/order")
+	if err != nil {
+		initializers.Log.Fatal("can not parse order service url : ", zap.Error(err))
+	}
 
 	userProxy := httputil.NewSingleHostReverseProxy(userServiceURL)
 	authProxy := httputil.NewSingleHostReverseProxy(authServiceURL)

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/paipaipai666/EnterpriseHub/order-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/api"
@@ -10,12 +8,14 @@ import (
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/pb"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/repository"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/service"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
 	initializers.LoadEnv()
+	initializers.InitLogger("order_service")
 	initializers.ConnectToDatabase()
 	initializers.ConnectToRabbitMQ()
 }
@@ -26,11 +26,11 @@ func main() {
 
 	userConn, err := grpc.NewClient(userServerAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatal("cannot dial server: ", err)
+		initializers.Log.Fatal("cannot user dial server: ", zap.Error(err))
 	}
 	paymentConn, err := grpc.NewClient(paymentServerAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatal("cannot dial server: ", err)
+		initializers.Log.Fatal("cannot payment dial server: ", zap.Error(err))
 	}
 
 	userServiceClient := pb.NewUserServiceClient(userConn)

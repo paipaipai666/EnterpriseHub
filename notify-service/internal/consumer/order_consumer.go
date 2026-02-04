@@ -2,7 +2,6 @@ package consumer
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/paipaipai666/EnterpriseHub/notify-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/notify-service/internal/event"
@@ -31,7 +30,7 @@ func StartConsumer() {
 			notificationService.SendOrderPaidNotification(event)
 		default:
 			// 处理未知消息类型
-			log.Printf("未知的消息类型: %s", routingKey)
+			initializers.Log.Fatal("未知的消息类型: %s" + routingKey)
 		}
 
 		msg.Ack(false)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/paipaipai666/EnterpriseHub/gateway-service/initializers"
 )
 
 var hmacSampleSecret = []byte(os.Getenv("SECRET_KEY"))
@@ -111,7 +112,7 @@ func JWTAuth(c *gin.Context) {
 	}
 
 	c.Set("username", username)
-	fmt.Println("JWTAuth: Token validated successfully for user:", username)
+	initializers.Log.Info("JWTAuth: Token validated successfully for user: " + username)
 	c.Next()
 }
 

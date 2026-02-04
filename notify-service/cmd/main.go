@@ -7,11 +7,12 @@ import (
 
 func init() {
 	initializers.LoadEnv()
+	initializers.InitLogger("notify_service")
 	initializers.ConnectToRabbitMQ()
 }
 
 func main() {
-	var forever chan struct{}
+	forever := make(chan struct{})
 
 	go consumer.StartConsumer()
 

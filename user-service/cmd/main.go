@@ -11,11 +11,13 @@ import (
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/pb"
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/repository"
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/service"
+	"github.com/paipaipai666/EnterpriseHub/user-service/middleware"
 	"google.golang.org/grpc"
 )
 
 func init() {
 	initializers.LoadEnv()
+	initializers.InitLogger("user_service")
 	initializers.ConnectToDatabase()
 }
 
@@ -49,7 +51,10 @@ func startGrpcServer() {
 }
 
 func startHttpServer() {
-	router := gin.Default()
+	router := gin.New()
+
+	router.Use(gin.Recovery())
+	router.Use(middleware.GinLogger)
 
 	apiRoutes := router.Group("/api/v1/users")
 	{

@@ -1,20 +1,20 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/paipaipai666/EnterpriseHub/auth-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/auth-service/internal/api"
 	"github.com/paipaipai666/EnterpriseHub/auth-service/internal/client"
 	"github.com/paipaipai666/EnterpriseHub/auth-service/internal/pb"
 	"github.com/paipaipai666/EnterpriseHub/auth-service/internal/service"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
 	initializers.LoadEnv()
+	initializers.InitLogger("auth_service")
 	initializers.ConnectToRedis()
 }
 
@@ -23,7 +23,7 @@ func main() {
 
 	conn, err := grpc.NewClient(serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatal("cannot dial server: ", err)
+		initializers.Log.Fatal("cannot gRPC dial server: ", zap.Error(err))
 	}
 
 	userServiceClient := pb.NewUserServiceClient(conn)
