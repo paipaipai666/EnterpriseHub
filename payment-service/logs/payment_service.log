@@ -5,3 +5,7 @@
 {"level":"INFO","ts":"2026-02-05 16:59:13","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
 {"level":"INFO","ts":"2026-02-05 17:03:02","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
 {"level":"INFO","ts":"2026-02-05 17:03:02","caller":"initializers/cache.go:32","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 17:05:04","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 17:05:04","caller":"initializers/cache.go:32","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 19:43:35","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 19:43:35","caller":"initializers/cache.go:32","msg":"Redis数据库连接成功"}

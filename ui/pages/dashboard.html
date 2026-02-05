@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnterpriseHub - 管理后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { transform: translateX(4px); }
+        .nav-item.active { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0">
+            <div class="flex flex-col h-full">
+                <div class="flex items-center justify-center h-16 border-b border-gray-100">
+                    <i class="fas fa-building text-2xl text-primary-600 mr-2"></i>
+                    <span class="text-xl font-bold text-gray-900">EnterpriseHub</span>
+                </div>
+
+                <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                    <a href="dashboard.html" class="nav-item active flex items-center px-4 py-3 text-white rounded-xl mb-2 cursor-pointer">
+                        <i class="fas fa-home w-6"></i>
+                        <span class="font-medium">仪表盘</span>
+                    </a>
+
+                    <div class="pt-4 pb-2">
+                        <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">管理功能</p>
+                    </div>
+
+                    <a href="users.html" class="sidebar-link flex items-center px-4 py-3 text-gray-600 hover:bg-primary-50 hover:text-primary-600 rounded-xl mb-1 cursor-pointer">
+                        <i class="fas fa-users w-6"></i>
+                        <span class="font-medium">用户管理</span>
+                    </a>
+
+                    <a href="orders.html" class="sidebar-link flex items-center px-4 py-3 text-gray-600 hover:bg-primary-50 hover:text-primary-600 rounded-xl mb-1 cursor-pointer">
+                        <i class="fas fa-shopping-cart w-6"></i>
+                        <span class="font-medium">订单管理</span>
+                    </a>
+
+                    <div class="pt-4 pb-2">
+                        <p class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">系统信息</p>
+                    </div>
+
+                    <a href="#" class="sidebar-link flex items-center px-4 py-3 text-gray-600 hover:bg-primary-50 hover:text-primary-600 rounded-xl mb-1 cursor-pointer">
+                        <i class="fas fa-chart-line w-6"></i>
+                        <span class="font-medium">数据分析</span>
+                    </a>
+
+                    <a href="#" class="sidebar-link flex items-center px-4 py-3 text-gray-600 hover:bg-primary-50 hover:text-primary-600 rounded-xl mb-1 cursor-pointer">
+                        <i class="fas fa-cog w-6"></i>
+                        <span class="font-medium">系统设置</span>
+                    </a>
+                </nav>
+
+                <div class="p-4 border-t border-gray-100">
+                    <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-primary-600"></i>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900" id="currentUser">管理员</p>
+                            <p class="text-xs text-gray-500">在线</p>
+                        </div>
+                        <button onclick="logout()" class="text-gray-400 hover:text-red-500 cursor-pointer transition-colors" title="退出登录">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6">
+                <button id="sidebarToggle" class="lg:hidden text-gray-600 hover:text-gray-900 cursor-pointer">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-400 hover:text-gray-600 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors relative">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main id="mainContent" class="flex-1 overflow-y-auto p-6">
+                <div id="pageContent">
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="modalOverlay" class="fixed inset-0 bg-black/50 hidden z-40 modal-overlay"></div>
+
+    <script src="../js/api.js"></script>
+    <script>
+        const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+
+        function initSidebar() {
+            const navItems = document.querySelectorAll('.nav-item, .sidebar-link');
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPage || (currentPage === '' && href === 'dashboard.html')) {
+                    item.classList.add('active');
+                    item.classList.remove('text-gray-600', 'hover:bg-primary-50', 'hover:text-primary-600');
+                } else if (!item.classList.contains('nav-item')) {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('modalOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        document.getElementById('sidebarToggle')?.addEventListener('click', toggleSidebar);
+
+        document.getElementById('modalOverlay')?.addEventListener('click', toggleSidebar);
+
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
+                window.location.href = '../index.html';
+            }
+        }
+
+        function loadPage(page) {
+            const content = document.getElementById('pageContent');
+            showLoading('pageContent');
+
+            setTimeout(() => {
+                switch(page) {
+                    case 'dashboard':
+                        loadDashboard(content);
+                        break;
+                    case 'users':
+                        loadUsersPage(content);
+                        break;
+                    case 'orders':
+                        loadOrdersPage(content);
+                        break;
+                    default:
+                        loadDashboard(content);
+                }
+            }, 300);
+        }
+
+        function loadDashboard(container) {
+            container.innerHTML = `
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-gray-900">仪表盘</h1>
+                    <p class="text-gray-500 mt-1">欢迎回来，<span id="welcomeUser">管理员</span></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 border border-gray-100 cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">用户总数</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-1">1,234</p>
+                                <p class="text-sm text-green-500 mt-2">
+                                    <i class="fas fa-arrow-up mr-1"></i>12%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-users text-xl text-primary-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 border border-gray-100 cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">今日订单</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-1">56</p>
+                                <p class="text-sm text-green-500 mt-2">
+                                    <i class="fas fa-arrow-up mr-1"></i>8%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-xl text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 border border-gray-100 cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">总收入</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-1">¥45,678</p>
+                                <p class="text-sm text-green-500 mt-2">
+                                    <i class="fas fa-arrow-up mr-1"></i>23%
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-yen-sign text-xl text-yellow-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-hover bg-white rounded-xl shadow-sm p-6 border border-gray-100 cursor-pointer">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">待处理</p>
+                                <p class="text-3xl font-bold text-gray-900 mt-1">12</p>
+                                <p class="text-sm text-orange-500 mt-2">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>需要关注
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-clock text-xl text-orange-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">最近订单</h3>
+                        <div class="space-y-4" id="recentOrders">
+                            <div class="flex items-center justify-center py-8 text-gray-400">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>加载中...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">快速操作</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="window.location.href='users.html'" class="p-4 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors cursor-pointer">
+                                <i class="fas fa-user-plus text-primary-600 text-xl mb-2"></i>
+                                <p class="text-sm font-medium text-primary-700">添加用户</p>
+                            </button>
+                            <button onclick="window.location.href='orders.html'" class="p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors cursor-pointer">
+                                <i class="fas fa-plus-circle text-green-600 text-xl mb-2"></i>
+                                <p class="text-sm font-medium text-green-700">创建订单</p>
+                            </button>
+                            <button class="p-4 bg-yellow-50 hover:bg-yellow-100 rounded-xl transition-colors cursor-pointer">
+                                <i class="fas fa-file-alt text-yellow-600 text-xl mb-2"></i>
+                                <p class="text-sm font-medium text-yellow-700">生成报表</p>
+                            </button>
+                            <button class="p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors cursor-pointer">
+                                <i class="fas fa-cog text-purple-600 text-xl mb-2"></i>
+                                <p class="text-sm font-medium text-purple-700">系统设置</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const username = localStorage.getItem('username') || '管理员';
+            document.getElementById('welcomeUser').textContent = username;
+            document.getElementById('currentUser').textContent = username;
+
+            loadRecentOrders();
+        }
+
+        async function loadRecentOrders() {
+            const container = document.getElementById('recentOrders');
+            try {
+                const userId = localStorage.getItem('userId') || 'default';
+                const response = await OrderAPI.getList(userId);
+
+                if (response.message === 'success' && response.data && response.data.length > 0) {
+                    const orders = response.data.slice(0, 5);
+                    container.innerHTML = orders.map(order => `
+                        <div class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                    <i class="fas fa-shopping-bag text-gray-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">订单 ${order.id?.substring(0, 8) || '-'}</p>
+                                    <p class="text-xs text-gray-500">${formatDate(order.createdAt)}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">${formatCurrency(order.amount)}</p>
+                                <span class="inline-block px-2 py-0.5 text-xs rounded-full ${getStatusClass(order.status)}">
+                                    ${OrderStatusText[order.status] || order.status || '未知'}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-400">
+                            <i class="fas fa-shopping-cart text-4xl mb-3"></i>
+                            <p>暂无订单数据</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                        <p>加载失败，请刷新重试</p>
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'paid': return 'bg-green-100 text-green-700';
+                case 'pending': return 'bg-yellow-100 text-yellow-700';
+                case 'cancelled': return 'bg-red-100 text-red-700';
+                default: return 'bg-gray-100 text-gray-700';
+            }
+        }
+
+        function loadUsersPage(container) {
+            container.innerHTML = `
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">用户管理</h1>
+                        <p class="text-gray-500 mt-1">管理系统用户账户</p>
+                    </div>
+                    <button onclick="showRegisterModal()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
+                        <i class="fas fa-user-plus mr-2"></i>添加用户
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="userSearch" placeholder="搜索用户..."
+                                    class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 w-64">
+                            </div>
+                            <select id="userStatusFilter" class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 cursor-pointer">
+                                <option value="">全部状态</option>
+                                <option value="active">在线</option>
+                                <option value="inactive">离线</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 text-gray-400 hover:text-gray-600 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <button class="p-2 text-gray-400 hover:text-gray-600 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>加载中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                        <p class="text-sm text-gray-500">显示 <span id="userStart">0</span> - <span id="userEnd">0</span> 条，共 <span id="userTotal">0</span> 条</p>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 cursor-pointer disabled:opacity-50" id="userPrevBtn" disabled>上一页</button>
+                            <span class="px-3 py-1 bg-primary-100 text-primary-700 rounded-lg text-sm">1</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 cursor-pointer" id="userNextBtn">下一页</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="registerModal" class="fixed inset-0 z-50 hidden">
+                    <div class="fixed inset-0 bg-black/50 modal-overlay" onclick="closeRegisterModal()"></div>
+                    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 z-50">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900">添加新用户</h3>
+                            <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <form id="registerForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                                <input type="text" id="regUsername" required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                    placeholder="请输入用户名">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">密码</label>
+                                <input type="password" id="regPassword" required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                    placeholder="请输入密码">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">确认密码</label>
+                                <input type="password" id="regPasswordConfirm" required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                    placeholder="请再次输入密码">
+                            </div>
+
+                            <div class="flex space-x-3 pt-4">
+                                <button type="button" onclick="closeRegisterModal()"
+                                    class="flex-1 px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                                    取消
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors cursor-pointer">
+                                    <span id="regBtnText">添加用户</span>
+                                    <i class="fas fa-spinner fa-spin ml-2 hidden" id="regSpinner"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            loadUsers();
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            try {
+                const response = await UserAPI.getAll();
+
+                if (response.message === 'success' && response.data) {
+                    const users = Array.isArray(response.data) ? response.data : [response.data];
+                    tbody.innerHTML = users.map(user => `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mr-3">
+                                        <i class="fas fa-user text-primary-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">${user.id || '-'}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-900">${user.username || '-'}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full mr-1.5"></span>
+                                    在线
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${formatDate(user.createdAt)}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <button onclick="viewUser('${user.id}')" class="text-primary-600 hover:text-primary-900 mr-3 cursor-pointer">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button onclick="editUser('${user.id}')" class="text-gray-600 hover:text-gray-900 mr-3 cursor-pointer">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="deleteUser('${user.id}')" class="text-red-600 hover:text-red-900 cursor-pointer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById('userTotal').textContent = users.length;
+                    document.getElementById('userStart').textContent = '1';
+                    document.getElementById('userEnd').textContent = users.length;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                                <i class="fas fa-users text-4xl mb-3"></i>
+                                <p>暂无用户数据</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-red-400">
+                            <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                            <p>加载失败: ${error.message}</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function showRegisterModal() {
+            document.getElementById('registerModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            document.getElementById('registerForm').reset();
+        }
+
+        document.getElementById('registerForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+
+            if (password !== passwordConfirm) {
+                showToast('两次输入的密码不一致', 'error');
+                return;
+            }
+
+            const regBtn = e.target.querySelector('button[type="submit"]');
+            const regBtnText = document.getElementById('regBtnText');
+            const regSpinner = document.getElementById('regSpinner');
+
+            regBtn.disabled = true;
+            regBtnText.textContent = '注册中...';
+            regSpinner.classList.remove('hidden');
+
+            try {
+                const response = await UserAPI.register(username, password);
+
+                if (response.message === 'success') {
+                    showToast('用户注册成功!', 'success');
+                    closeRegisterModal();
+                    loadUsers();
+                } else {
+                    showToast(response.data || '注册失败', 'error');
+                }
+            } catch (error) {
+                showToast('注册失败: ' + error.message, 'error');
+            } finally {
+                regBtn.disabled = false;
+                regBtnText.textContent = '添加用户';
+                regSpinner.classList.add('hidden');
+            }
+        });
+
+        function viewUser(id) {
+            UserAPI.getById(id).then(response => {
+                if (response.message === 'success' && response.data) {
+                    const user = response.data;
+                    alert(`用户详情\n\nID: ${user.id}\n用户名: ${user.username}\n创建时间: ${formatDate(user.createdAt)}`);
+                }
+            }).catch(error => {
+                showToast('获取用户信息失败', 'error');
+            });
+        }
+
+        function editUser(id) {
+            showToast('编辑功能开发中', 'info');
+        }
+
+        function deleteUser(id) {
+            if (confirm('确定要删除该用户吗？此操作不可恢复。')) {
+                showToast('删除功能开发中', 'info');
+            }
+        }
+
+        function loadOrdersPage(container) {
+            container.innerHTML = `
+                <div class="mb-8 flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">订单管理</h1>
+                        <p class="text-gray-500 mt-1">管理所有业务订单</p>
+                    </div>
+                    <button onclick="showCreateOrderModal()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors cursor-pointer">
+                        <i class="fas fa-plus mr-2"></i>创建订单
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="orderSearch" placeholder="搜索订单..."
+                                    class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 w-64">
+                            </div>
+                            <select id="orderStatusFilter" class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-primary-500 cursor-pointer">
+                                <option value="">全部状态</option>
+                                <option value="pending">待支付</option>
+                                <option value="paid">已支付</option>
+                                <option value="cancelled">已取消</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="p-2 text-gray-400 hover:text-gray-600 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <button class="p-2 text-gray-400 hover:text-gray-600 cursor-pointer rounded-lg hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">订单ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">金额</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>加载中...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                        <p class="text-sm text-gray-500">显示 <span id="orderStart">0</span> - <span id="orderEnd">0</span> 条，共 <span id="orderTotal">0</span> 条</p>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 cursor-pointer disabled:opacity-50" id="orderPrevBtn" disabled>上一页</button>
+                            <span class="px-3 py-1 bg-primary-100 text-primary-700 rounded-lg text-sm">1</span>
+                            <button class="px-3 py-1 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 cursor-pointer" id="orderNextBtn">下一页</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="createOrderModal" class="fixed inset-0 z-50 hidden">
+                    <div class="fixed inset-0 bg-black/50 modal-overlay" onclick="closeCreateOrderModal()"></div>
+                    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 z-50">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900">创建新订单</h3>
+                            <button onclick="closeCreateOrderModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <form id="createOrderForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">用户ID</label>
+                                <input type="text" id="orderUserId" required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                    placeholder="请输入用户ID">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">订单金额 (¥)</label>
+                                <input type="number" id="orderAmount" required step="0.01" min="0.01"
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
+                                    placeholder="请输入订单金额">
+                            </div>
+
+                            <div class="flex space-x-3 pt-4">
+                                <button type="button" onclick="closeCreateOrderModal()"
+                                    class="flex-1 px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                                    取消
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors cursor-pointer">
+                                    <span id="createOrderBtnText">创建订单</span>
+                                    <i class="fas fa-spinner fa-spin ml-2 hidden" id="createOrderSpinner"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="payOrderModal" class="fixed inset-0 z-50 hidden">
+                    <div class="fixed inset-0 bg-black/50 modal-overlay" onclick="closePayOrderModal()"></div>
+                    <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 z-50">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-semibold text-gray-900">订单支付</h3>
+                            <button onclick="closePayOrderModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <div class="mb-6 p-4 bg-gray-50 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">订单号</p>
+                            <p class="text-lg font-medium text-gray-900" id="payOrderId">-</p>
+                            <p class="text-sm text-gray-500 mt-3 mb-1">支付金额</p>
+                            <p class="text-2xl font-bold text-primary-600" id="payOrderAmount">¥0.00</p>
+                        </div>
+
+                        <form id="payOrderForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">选择支付方式</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="paymentMethod" value="1" class="peer hidden" checked>
+                                        <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                            <i class="fab fa-alipay text-2xl text-blue-600 mb-2"></i>
+                                            <p class="text-sm font-medium text-gray-900">支付宝</p>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="paymentMethod" value="2" class="peer hidden">
+                                        <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                            <i class="fab fa-weixin text-2xl text-green-600 mb-2"></i>
+                                            <p class="text-sm font-medium text-gray-900">微信支付</p>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="paymentMethod" value="3" class="peer hidden">
+                                        <div class="p-4 border-2 border-gray-200 rounded-xl peer-checked:border-primary-500 peer-checked:bg-primary-50 transition-all">
+                                            <i class="fas fa-credit-card text-2xl text-purple-600 mb-2"></i>
+                                            <p class="text-sm font-medium text-gray-900">银行卡</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-3 pt-4">
+                                <button type="button" onclick="closePayOrderModal()"
+                                    class="flex-1 px-4 py-3 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                                    取消
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 px-4 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors cursor-pointer">
+                                    <span id="payBtnText">确认支付</span>
+                                    <i class="fas fa-spinner fa-spin ml-2 hidden" id="paySpinner"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            loadOrders();
+        }
+
+        async function loadOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            try {
+                const userId = localStorage.getItem('userId') || 'default';
+                const response = await OrderAPI.getList(userId);
+
+                if (response.message === 'success' && response.data) {
+                    const orders = Array.isArray(response.data) ? response.data : [response.data];
+                    tbody.innerHTML = orders.map(order => `
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-medium text-gray-900">${order.id || '-'}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm text-gray-600">${order.userId || '-'}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm font-medium text-gray-900">${formatCurrency(order.amount)}</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOrderStatusClass(order.status)}">
+                                    ${OrderStatusText[order.status] || order.status || '未知'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${formatDate(order.createdAt)}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                ${order.status !== 'paid' && order.status !== 'cancelled' ? `
+                                    <button onclick="showPayOrderModal('${order.id}', ${order.amount})" class="text-green-600 hover:text-green-900 mr-3 cursor-pointer" title="支付">
+                                        <i class="fas fa-credit-card"></i>
+                                    </button>
+                                    <button onclick="cancelOrder('${order.id}')" class="text-orange-600 hover:text-orange-900 mr-3 cursor-pointer" title="取消">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                ` : ''}
+                                <button onclick="viewOrder('${order.id}')" class="text-primary-600 hover:text-primary-900 cursor-pointer" title="查看详情">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById('orderTotal').textContent = orders.length;
+                    document.getElementById('orderStart').textContent = '1';
+                    document.getElementById('orderEnd').textContent = orders.length;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                                <i class="fas fa-shopping-cart text-4xl mb-3"></i>
+                                <p>暂无订单数据</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-red-400">
+                            <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                            <p>加载失败: ${error.message}</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function getOrderStatusClass(status) {
+            switch(status) {
+                case 'paid': return 'bg-green-100 text-green-800';
+                case 'pending': return 'bg-yellow-100 text-yellow-800';
+                case 'cancelled': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function showCreateOrderModal() {
+            document.getElementById('createOrderModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeCreateOrderModal() {
+            document.getElementById('createOrderModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            document.getElementById('createOrderForm').reset();
+        }
+
+        document.getElementById('createOrderForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const userId = document.getElementById('orderUserId').value;
+            const amount = document.getElementById('orderAmount').value;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const btnText = document.getElementById('createOrderBtnText');
+            const spinner = document.getElementById('createOrderSpinner');
+
+            submitBtn.disabled = true;
+            btnText.textContent = '创建中...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await OrderAPI.create(userId, amount);
+
+                if (response.message === 'success') {
+                    showToast('订单创建成功!', 'success');
+                    closeCreateOrderModal();
+                    loadOrders();
+                } else {
+                    showToast(response.data || '创建失败', 'error');
+                }
+            } catch (error) {
+                showToast('创建失败: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = '创建订单';
+                spinner.classList.add('hidden');
+            }
+        });
+
+        let currentPayOrderId = '';
+        let currentPayOrderAmount = 0;
+
+        function showPayOrderModal(orderId, amount) {
+            currentPayOrderId = orderId;
+            currentPayOrderAmount = amount;
+            document.getElementById('payOrderId').textContent = orderId;
+            document.getElementById('payOrderAmount').textContent = formatCurrency(amount);
+            document.getElementById('payOrderModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closePayOrderModal() {
+            document.getElementById('payOrderModal').classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+            currentPayOrderId = '';
+            currentPayOrderAmount = 0;
+        }
+
+        document.getElementById('payOrderForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const btnText = document.getElementById('payBtnText');
+            const spinner = document.getElementById('paySpinner');
+
+            submitBtn.disabled = true;
+            btnText.textContent = '支付中...';
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await OrderAPI.pay(currentPayOrderId, method);
+
+                if (response.message === 'success') {
+                    showToast('支付成功!', 'success');
+                    closePayOrderModal();
+                    loadOrders();
+                } else {
+                    showToast(response.data || '支付失败', 'error');
+                }
+            } catch (error) {
+                showToast('支付失败: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = '确认支付';
+                spinner.classList.add('hidden');
+            }
+        });
+
+        async function cancelOrder(orderId) {
+            if (!confirm('确定要取消该订单吗？')) return;
+
+            try {
+                const response = await OrderAPI.cancel(orderId);
+
+                if (response.message === 'success') {
+                    showToast('订单已取消', 'success');
+                    loadOrders();
+                } else {
+                    showToast(response.data || '取消失败', 'error');
+                }
+            } catch (error) {
+                showToast('取消失败: ' + error.message, 'error');
+            }
+        }
+
+        async function viewOrder(orderId) {
+            try {
+                const response = await OrderAPI.getById(orderId);
+
+                if (response.message === 'success' && response.data) {
+                    const order = response.data;
+                    alert(`订单详情\n\n订单ID: ${order.id}\n用户ID: ${order.userId}\n金额: ${formatCurrency(order.amount)}\n状态: ${OrderStatusText[order.status] || order.status}\n创建时间: ${formatDate(order.createdAt)}\n支付时间: ${formatDate(order.paidAt)}`);
+                }
+            } catch (error) {
+                showToast('获取订单信息失败', 'error');
+            }
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '../index.html';
+                return false;
+            }
+            return true;
+        }
+
+        initSidebar();
+
+        if (checkAuth()) {
+            const pageName = currentPage.replace('.html', '');
+            loadPage(pageName === '' ? 'dashboard' : pageName);
+        }
+    </script>
+</body>
+</html>

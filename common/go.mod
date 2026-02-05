@@ -2,7 +2,10 @@ module github.com/paipaipai666/EnterpriseHub/common
 
 go 1.25.6
 
-require github.com/redis/go-redis/v9 v9.17.3
+require (
+	github.com/redis/go-redis/v9 v9.17.3
+	golang.org/x/sync v0.19.0
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

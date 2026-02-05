@@ -9,6 +9,7 @@ import (
 type UserController interface {
 	SignUp(ctx *gin.Context)
 	FindUserById(ctx *gin.Context)
+	FindUserByUsername(ctx *gin.Context)
 	FindAllUser(ctx *gin.Context)
 }
 
@@ -58,6 +59,32 @@ func (uci *userControllerImpl) FindUserById(ctx *gin.Context) {
 		ctx.JSON(500, gin.H{
 			"message": "failed",
 			"data":    id,
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"message": "success",
+		"data":    user,
+	})
+}
+
+func (uci *userControllerImpl) FindUserByUsername(ctx *gin.Context) {
+	username := ctx.Param("username")
+
+	user, err := uci.service.GetUserByUsername(username)
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"message": "failed",
+			"data":    err.Error(),
+		})
+		return
+	}
+
+	if user == nil {
+		ctx.JSON(404, gin.H{
+			"message": "failed",
+			"data":    "user not found",
 		})
 		return
 	}

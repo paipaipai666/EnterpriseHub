@@ -62,6 +62,8 @@ func startHttpServer(userController api.UserController) {
 
 		apiRoutes.GET("/get/:id", userController.FindUserById)
 
+		apiRoutes.GET("/get_by_username/:username", userController.FindUserByUsername)
+
 		apiRoutes.GET("/get_all", userController.FindAllUser)
 	}
 

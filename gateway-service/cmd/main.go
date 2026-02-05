@@ -4,6 +4,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/paipaipai666/EnterpriseHub/gateway-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/gateway-service/middleware"
@@ -17,6 +18,14 @@ func init() {
 
 func main() {
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	router.Use(middleware.JWTAuth)
 

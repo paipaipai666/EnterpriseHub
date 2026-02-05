@@ -1,0 +1,4 @@
+{"level":"INFO","ts":"2026-02-05 15:27:52","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:27:52","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 19:44:09","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 19:44:09","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}

@@ -1,742 +1,354 @@
 # EnterpriseHub API 文档
 
-> EnterpriseHub 企业级微服务项目接口规范
+本文档按服务分类整理了系统中所有的 API 接口，包括 REST API 和 gRPC API。
 
 ---
 
-## 一、接口通用规范
+## 目录
 
-### 1.1 基础约定
-
-| 项目 | 规范 |
-|------|------|
-| 接口风格 | RESTful |
-| 数据格式 | JSON |
-| 字符编码 | UTF-8 |
-| 统一入口 | API Gateway (8080) |
-| 认证方式 | JWT Bearer Token |
-
-### 1.2 统一响应结构
-
-所有接口返回统一格式：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": {}
-}
-```
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| code | int | 0 表示成功，非 0 表示错误 |
-| message | string | 状态描述信息 |
-| data | object | 响应数据 |
-
-### 1.3 认证方式
-
-除公开接口外，所有请求需携带 JWT Token：
-
-```
-Authorization: Bearer <token>
-```
-
-**公开接口（无需认证）**：
-- `POST /api/v1/auth/login`
-- `POST /api/v1/users/register`
+- [User Service](#user-service)
+- [Auth Service](#auth-service)
+- [Order Service](#order-service)
+- [Payment Service](#payment-service)
+- [Gateway Service](#gateway-service)
 
 ---
 
-## 二、用户服务 (user-service)
+## User Service
 
-> 端口：8001 | 基础路径：`/api/v1/users`
+用户服务，提供用户注册、查询等功能的 REST 和 gRPC 接口。
 
-### 2.1 用户注册
+**服务端口:**
+- HTTP: `8000`
+- gRPC: `8001`
 
-- **URL**: `POST /api/v1/users/register`
-- **认证**: 否
+### REST API
 
-**请求参数**：
+| 方法 | 路径 | 描述 | 请求参数 |
+|------|------|------|----------|
+| POST | `/api/v1/users/register` | 用户注册 | JSON: `{username, password}` |
+| GET | `/api/v1/users/get/:id` | 根据ID获取用户 | 路径参数: `id` |
+| GET | `/api/v1/users/get_all` | 获取所有用户 | 无 |
+
+**请求示例:**
+
+```bash
+# 用户注册
+POST /api/v1/users/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+
+# 根据ID获取用户
+GET /api/v1/users/get/123
+
+# 获取所有用户
+GET /api/v1/users/get_all
+```
+
+**响应格式:**
 
 ```json
 {
-    "username": "testuser",
-    "Password": "123456",
-    "email": "test@example.com"
+  "message": "success",
+  "data": {}
 }
 ```
 
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| username | string | 是 | 用户名 |
-| Password | string | 是 | 密码 |
-| email | string | 是 | 邮箱 |
+### gRPC API
 
-**响应示例** (200)：
+**服务定义:** `UserService`
 
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": "user_id"
-}
-```
+| 方法 | 请求类型 | 响应类型 | 描述 |
+|------|----------|----------|------|
+| GetUserById | GetUserByIdRequest | UserResponse | 根据用户ID获取用户信息 |
+| GetUserByUsername | GetUserByUsernameRequest | UserResponse | 根据用户名获取用户信息 |
 
----
-
-### 2.2 获取用户信息
-
-- **URL**: `GET /api/v1/users/:id`
-- **认证**: 是
-
-**路径参数**：
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| id | string | 用户ID |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "Id": "uuid-xxx",
-        "Username": "testuser",
-        "Password": "123456",
-        "Email": "test@example.com"
-    }
-}
-```
-
----
-
-### 2.3 获取所有用户
-
-- **URL**: `GET /api/v1/users`
-- **认证**: 是
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": [
-        {
-            "Id": "uuid-xxx",
-            "Username": "user1",
-            "Password": "xxx",
-            "Email": "user1@example.com"
-        },
-        {
-            "Id": "uuid-yyy",
-            "Username": "user2",
-            "Password": "xxx",
-            "Email": "user2@example.com"
-        }
-    ]
-}
-```
-
----
-
-## 三、认证服务 (auth-service)
-
-> 端口：8002 | 基础路径：`/api/v1/auth`
-
-### 3.1 用户登录
-
-- **URL**: `POST /api/v1/auth/login`
-- **认证**: 否
-
-**请求参数**：
-
-```json
-{
-    "username": "testuser",
-    "password": "123456"
-}
-```
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| username | string | 是 | 用户名 |
-| password | string | 是 | 密码 |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    }
-}
-```
-
-**错误响应** (401)：
-
-```json
-{
-    "code": 401,
-    "message": "failed",
-    "data": "invalid credentials"
-}
-```
-
----
-
-### 3.2 用户登出
-
-- **URL**: `POST /api/v1/auth/logout`
-- **认证**: 是
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": "你已安全退出"
-}
-```
-
----
-
-### 3.3 验证 Token
-
-- **URL**: `POST /api/v1/auth/verify`
-- **认证**: 是
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "valid": true,
-        "username": "testuser"
-    }
-}
-```
-
----
-
-## 四、订单服务 (order-service)
-
-> 端口：10000 | 基础路径：`/api/v1/order`
-
-### 4.1 创建订单
-
-- **URL**: `POST /api/v1/order/create`
-- **认证**: 是
-
-**请求参数**：
-
-```json
-{
-    "user_id": "uuid-xxx",
-    "amount": 199.99
-}
-```
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| user_id | string | 是 | 用户ID |
-| amount | float64 | 是 | 订单金额 |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": "order-uuid-xxx"
-}
-```
-
-**业务流程**：
-1. 创建订单（状态：CREATED）
-2. 发布 `order.created` 事件到 RabbitMQ
-3. notify-service 消费事件并发送通知
-
----
-
-### 4.2 获取订单
-
-- **URL**: `GET /api/v1/order/get/:id`
-- **认证**: 是
-
-**路径参数**：
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| id | string | 订单ID |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": {
-        "Id": "order-uuid-xxx",
-        "UserId": "user-uuid-xxx",
-        "Amount": 199.99,
-        "Status": "CREATED",
-        "CreateAt": "2024-01-01T10:00:00Z",
-        "UpdateAt": "2024-01-01T10:00:00Z"
-    }
-}
-```
-
----
-
-### 4.3 获取用户订单列表
-
-- **URL**: `GET /api/v1/order/list/:user_id`
-- **认证**: 是
-
-**路径参数**：
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| user_id | string | 用户ID |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": [
-        {
-            "Id": "order-uuid-1",
-            "UserId": "user-uuid-xxx",
-            "Amount": 199.99,
-            "Status": "CREATED"
-        },
-        {
-            "Id": "order-uuid-2",
-            "UserId": "user-uuid-xxx",
-            "Amount": 99.00,
-            "Status": "PAID"
-        }
-    ]
-}
-```
-
----
-
-### 4.4 取消订单
-
-- **URL**: `PUT /api/v1/order/cancel/:id`
-- **认证**: 是
-
-**路径参数**：
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| id | string | 订单ID |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": "订单 order-uuid-xxx 已取消！"
-}
-```
-
-**业务规则**：
-- 仅允许取消 `CREATED` 状态的订单
-
----
-
-### 4.5 支付订单
-
-- **URL**: `POST /api/v1/order/pay/:id`
-- **认证**: 是
-
-**路径参数**：
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| id | string | 订单ID |
-
-**请求参数**：
-
-```json
-{
-    "method": "ALIPAY"
-}
-```
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| method | string | 是 | 支付方式 |
-
-**支付方式枚举**：
-
-| 值 | 说明 |
-|------|------|
-| ALIPAY | 支付宝 |
-| WECHAT | 微信支付 |
-| BALANCE | 余额支付 |
-
-**响应示例** (200)：
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": "payment-uuid-xxx"
-}
-```
-
-**业务流程**：
-1. 调用 payment-service 创建支付
-2. 处理支付结果
-3. 更新订单状态为 `PAID`
-4. 发布 `order.paid` 事件到 RabbitMQ
-
----
-
-## 五、订单状态说明
-
-| 状态 | 说明 | 可转换到 |
-|------|------|---------|
-| CREATED | 已创建 | PAID, CANCELLED |
-| PAID | 已支付 | COMPLETED |
-| COMPLETED | 已完成 | - |
-| CANCELLED | 已取消 | - |
-
----
-
-## 六、支付服务 (payment-service)
-
-> 端口：11001 | 内部 gRPC 服务
-
-支付服务不对外暴露 HTTP 接口，仅供内部服务调用。
-
-### 6.1 gRPC 接口
-
-**服务定义**：
+**消息定义:**
 
 ```protobuf
-service PaymentService {
-    rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
-    rpc Pay(PayRequest) returns (PayResponse);
-    rpc QueryPayment(QueryPaymentRequest) returns (QueryPaymentResponse);
+// 根据用户ID查询请求
+message GetUserByIdRequest {
+  string id = 1;
+}
+
+// 根据用户名查询请求
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
+// 用户响应消息
+message UserResponse {
+  string id = 1;
+  string username = 2;
+  string password = 3; // 仅内部使用
 }
 ```
 
 ---
 
-### 6.2 CreatePayment
+## Auth Service
 
-**请求**：
+认证服务，提供用户登录、登出功能的 REST 接口。
+
+**服务端口:** `9000`
+
+### REST API
+
+| 方法 | 路径 | 描述 | 请求参数 |
+|------|------|------|----------|
+| POST | `/api/v1/auth/login` | JWT登录 | JSON: `{username, password}` |
+| DELETE | `/api/v1/auth/logout` | 退出登录 | 无 |
+
+**请求示例:**
+
+```bash
+# JWT登录
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+
+# 退出登录
+DELETE /api/v1/auth/logout
+```
+
+**响应示例:**
 
 ```json
+// 登录成功
 {
-    "order_id": "order-uuid-xxx",
-    "user_id": "user-uuid-xxx",
-    "amount": 199.99,
-    "method": "PAYMENT_METHOD_ALIPAY"
+  "message": "success",
+  "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+// 退出成功
+{
+  "message": "success",
+  "data": "你已安全退出"
 }
 ```
 
-**响应**：
+### gRPC API
 
-```json
-{
-    "payment_id": "payment-uuid-xxx",
-    "status": "PAYMENT_STATUS_CREATED",
-    "created_at": 1704067200
-}
-```
+Auth Service 本身不提供 gRPC 服务，它通过 gRPC 客户端调用 User Service 的 gRPC 接口来完成用户认证。
 
 ---
 
-### 6.3 Pay
+## Order Service
 
-**请求**：
+订单服务，提供订单创建、查询、支付、取消等功能的 REST 接口。
 
-```json
+**服务端口:** `10000`
+
+### REST API
+
+| 方法 | 路径 | 描述 | 请求参数 |
+|------|------|------|----------|
+| POST | `/api/v1/order/create` | 创建订单 | JSON: `{userId, amount}` |
+| GET | `/api/v1/order/get/:id` | 根据ID获取订单 | 路径参数: `id` |
+| GET | `/api/v1/order/list/:user_id` | 获取用户订单列表 | 路径参数: `user_id` |
+| PUT | `/api/v1/order/cancel/:id` | 取消订单 | 路径参数: `id` |
+| POST | `/api/v1/order/pay/:id` | 支付订单 | 路径参数: `id`, JSON: `{method}` |
+
+**请求示例:**
+
+```bash
+# 创建订单
+POST /api/v1/order/create
+Content-Type: application/json
+
 {
-    "payment_id": "payment-uuid-xxx"
+  "userId": "user123",
+  "amount": 99.00
+}
+
+# 根据ID获取订单
+GET /api/v1/order/get/ord_123
+
+# 获取用户订单列表
+GET /api/v1/order/list/user123
+
+# 取消订单
+PUT /api/v1/order/cancel/ord_123
+
+# 支付订单
+POST /api/v1/order/pay/ord_123
+Content-Type: application/json
+
+{
+  "method": 1
 }
 ```
 
-**响应**：
+**支付方式 (PaymentMethod):**
 
-```json
-{
-    "status": "PAYMENT_STATUS_SUCCESS",
-    "transaction_id": "txn-xxx",
-    "paid_at": 1704067200
-}
-```
+| 值 | 描述 |
+|----|------|
+| 0 | 未知 |
+| 1 | 支付宝 |
+| 2 | 微信支付 |
+| 3 | 银行卡 |
+
+### gRPC API
+
+Order Service 本身不提供 gRPC 服务，它通过 gRPC 客户端调用 Payment Service 的 gRPC 接口来完成支付功能。
 
 ---
 
-### 6.4 QueryPayment
+## Payment Service
 
-**请求**：
+支付服务，提供支付订单创建、执行支付、查询支付状态等功能的 gRPC 接口。
 
-```json
-{
-    "payment_id": "payment-uuid-xxx"
-}
-```
+**服务端口:** `11001`
 
-**响应**：
+### REST API
 
-```json
-{
-    "payment_id": "payment-uuid-xxx",
-    "order_id": "order-uuid-xxx",
-    "user_id": "user-uuid-xxx",
-    "amount": 199.99,
-    "method": "ALIPAY",
-    "status": "SUCCESS",
-    "created_at": 1704067200,
-    "paid_at": 1704067200
-}
-```
+Payment Service 不提供 REST API，仅通过 gRPC 接口对外提供服务。
 
----
+### gRPC API
 
-### 6.5 支付状态枚举
+**服务定义:** `PaymentService`
 
-| 状态 | 说明 |
-|------|------|
-| CREATED | 已创建 |
-| PROCESSING | 处理中 |
-| SUCCESS | 成功 |
-| FAILED | 失败 |
-| TIMEOUT | 超时 |
+| 方法 | 请求类型 | 响应类型 | 描述 |
+|------|----------|----------|------|
+| CreatePayment | CreatePaymentRequest | CreatePaymentResponse | 创建支付订单 |
+| Pay | PayRequest | PayResponse | 执行支付操作 |
+| QueryPayment | QueryPaymentRequest | QueryPaymentResponse | 查询支付状态 |
 
----
-
-## 七、通知服务 (notify-service)
-
-> 消息队列消费者 | Exchange: `order_events`
-
-通知服务通过 RabbitMQ 异步消费订单事件，不提供 HTTP 接口。
-
-### 7.1 事件类型
-
-| 事件类型 | 说明 | 路由键 |
-|----------|------|--------|
-| order.created | 订单创建 | order.created |
-| order.paid | 订单支付 | order.paid |
-| order.cancelled | 订单取消 | order.cancelled |
-
-### 7.2 事件格式
-
-**order.created**：
-
-```json
-{
-    "event_type": "order.created",
-    "order_id": "order-uuid-xxx",
-    "user_id": "user-uuid-xxx",
-    "amount": 199.99,
-    "created_at": "2024-01-01T10:00:00Z"
-}
-```
-
-**order.paid**：
-
-```json
-{
-    "event_type": "order.paid",
-    "order_id": "order-uuid-xxx",
-    "user_id": "user-uuid-xxx",
-    "amount": 199.99,
-    "paid_at": "2024-01-01T10:30:00Z"
-}
-```
-
----
-
-## 八、错误码说明
-
-### 8.1 通用错误码
-
-| code | 说明 |
-|------|------|
-| 0 | 成功 |
-| 400 | 请求参数错误 |
-| 401 | 未认证 |
-| 403 | 无权限 |
-| 404 | 资源不存在 |
-| 500 | 系统内部错误 |
-
-### 8.2 业务错误码
-
-| code | 说明 |
-|------|------|
-| 10001 | 参数错误 |
-| 10002 | 未认证 |
-| 10003 | 无权限 |
-| 20001 | 用户不存在 |
-| 20002 | 用户已存在 |
-| 30001 | 订单不存在 |
-| 30002 | 订单状态不允许此操作 |
-| 40001 | 支付创建失败 |
-| 40002 | 支付处理失败 |
-| 40003 | 重复支付 |
-
----
-
-## 九、用户服务 gRPC
-
-> 端口：8001 | 内部 gRPC 服务
-
-### 9.1 gRPC 接口
-
-**服务定义**：
+**消息定义:**
 
 ```protobuf
-service UserService {
-    rpc GetUserById(GetUserRequest) returns (GetUserResponse);
-    rpc GetUserByUsername(GetUserByUsernameRequest) returns (GetUserResponse);
+// 创建支付请求
+message CreatePaymentRequest {
+  string order_id = 1;    // 业务订单号
+  double amount = 2;      // 支付金额（单位：分）
+  PaymentMethod method = 3; // 支付方式
+  string currency = 4;     // 币种（如 CNY）
+  string user_id = 5;      // 支付用户
+}
+
+// 创建支付响应
+message CreatePaymentResponse {
+  string payment_id = 1;  // 支付单号
+  PaymentStatus status = 2; // 初始状态（一般是 PENDING）
+  int64 created_at = 3;    // 创建时间（时间戳）
+}
+
+// 支付请求
+message PayRequest {
+  string payment_id = 1;   // 支付单号
+  string request_id = 2;   // 幂等ID（防重复支付）
+}
+
+// 支付响应
+message PayResponse {
+  PaymentStatus status = 1;        // 支付结果
+  string transaction_id = 2;      // 第三方交易号（可为空）
+  int64 paid_at = 3;              // 支付完成时间
+}
+
+// 查询支付请求
+message QueryPaymentRequest {
+  string payment_id = 1;
+}
+
+// 查询支付响应
+message QueryPaymentResponse {
+  string payment_id = 1;
+  string order_id = 2;
+  string user_id = 3;
+  double amount = 4;
+  string currency = 5;
+  PaymentMethod method = 6;
+  PaymentStatus status = 7;
+  int64 created_at = 8;
+  int64 paid_at = 9;
+}
+
+// 支付方式枚举
+enum PaymentMethod {
+  UNKNOWN = 0;
+  ALIPAY = 1;
+  WECHAT = 2;
+  BANK_CARD = 3;
+}
+
+// 支付状态枚举
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_PENDING = 1;
+  PAYMENT_STATUS_SUCCESS = 2;
+  PAYMENT_STATUS_FAILED = 3;
 }
 ```
 
 ---
 
-### 9.2 GetUserById
+## Gateway Service
 
-**请求**：
+网关服务，提供统一的 API 入口，对所有服务进行路由分发。
 
-```json
-{
-    "id": "user-uuid-xxx"
-}
-```
+**服务端口:** `8080`
 
-**响应**：
+### 路由规则
 
-```json
-{
-    "id": "user-uuid-xxx",
-    "username": "testuser",
-    "email": "test@example.com"
-}
-```
+| 路径模式 | 目标服务 | 目标端口 |
+|----------|----------|----------|
+| `/api/v1/users/*path` | User Service | 8000 |
+| `/api/v1/auth/*path` | Auth Service | 9000 |
+| `/api/v1/order/*path` | Order Service | 10000 |
+
+**注意:** Gateway Service 本身不提供业务 API，仅作为统一的 API 网关入口。所有请求需要通过 JWT 中间件认证。
 
 ---
 
-### 9.3 GetUserByUsername
+## 通用说明
 
-**请求**：
+### 响应格式
 
-```json
-{
-    "username": "testuser"
-}
-```
-
-**响应**：
+所有 REST API 返回统一的 JSON 格式：
 
 ```json
 {
-    "id": "user-uuid-xxx",
-    "username": "testuser",
-    "email": "test@example.com"
+  "message": "success",
+  "data": {}
 }
 ```
 
----
-
-## 十、接口调用流程
-
-### 10.1 用户登录 + 下单流程
-
-```
-1. POST /api/v1/auth/login
-   └─> 获取 JWT Token
-
-2. POST /api/v1/order/create (携带 Token)
-   └─> 创建订单
-   └─> 发布 order.created 事件
-   └─> notify-service 消费事件
-
-3. POST /api/v1/order/pay/:id (携带 Token)
-   └─> 调用 payment-service gRPC
-   └─> 支付成功
-   └─> 更新订单状态为 PAID
-   └─> 发布 order.paid 事件
-   └─> notify-service 消费事件
-```
-
-### 10.2 消息流转
-
-```
-┌─────────────┐     order.created      ┌───────────────┐
-│ order-service│ ────────────────────> │ order_events  │
-│              │                        │   (exchange)  │
-└─────────────┘                        └───────┬───────┘
-                                                 │
-                                                 │ order.#
-                                                 ▼
-┌─────────────┐                       ┌───────────────┐
-│notify-service│ <──────────────────── │ notifications │
-│              │                       │    (queue)    │
-└─────────────┘                       └───────────────┘
-```
-
----
-
-## 十一、环境配置
-
-### 11.1 服务端口
-
-| 服务 | 端口 | 说明 |
+| 字段 | 类型 | 描述 |
 |------|------|------|
-| gateway-service | 8080 | API 网关入口 |
-| user-service | 8001 | 用户服务 |
-| auth-service | 8002 | 认证服务 |
-| order-service | 10000 | 订单服务 |
-| payment-service | 11001 | 支付服务 |
+| message | string | 状态消息: "success" 或 "failed" |
+| data | any | 响应数据 |
 
-### 11.2 中间件
+### 认证
 
-| 中间件 | 端口 | 说明 |
-|--------|------|------|
-| MySQL | 3306 | 主数据库 |
-| Redis | 6379 | 缓存 |
-| RabbitMQ | 5672 | 消息队列 |
-| RabbitMQ Management | 15672 | 管理界面 |
+Gateway Service 使用 JWT 进行认证。请求需要在 Header 中携带 Token：
+
+```bash
+Authorization: Bearer <your_jwt_token>
+```
+
+### 服务间通信
+
+- **User Service** ← **Auth Service**: gRPC 调用
+- **User Service** ← **Order Service**: gRPC 调用
+- **Order Service** ← **Payment Service**: gRPC 调用
 
 ---
 
-## 十二、附录
+## 端口汇总
 
-### 12.1 JWT Payload 示例
-
-```json
-{
-    "username": "testuser",
-    "exp": 1704070800,
-    "iat": 1704067200
-}
-```
-
-### 12.2 Content-Type 要求
-
-所有请求和响应的 Content-Type 均为 `application/json`。
-
-### 12.3 请求超时
-
-- HTTP 接口：30 秒
-- gRPC 接口：30 秒
+| 服务 | HTTP 端口 | gRPC 端口 |
+|------|----------|----------|
+| User Service | 8000 | 8001 |
+| Auth Service | 9000 | - |
+| Order Service | 10000 | - |
+| Payment Service | - | 11001 |
+| Gateway Service | 8080 | - |
