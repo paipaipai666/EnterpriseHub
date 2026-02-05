@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/paipaipai666/EnterpriseHub/order-service/initializers"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/client"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/domain"
 	"github.com/paipaipai666/EnterpriseHub/order-service/internal/mq"
@@ -66,6 +65,10 @@ func (osi *orderServiceImpl) Pay(ctx *gin.Context, method int, orderId string) (
 		return "", fmt.Errorf("无法找到订单: %v", err)
 	}
 
+	if order.Status != domain.OrderStatusCreated {
+		return "", errors.New("订单状态不允许支付")
+	}
+
 	paymentRes, err := osi.paymentClient.CreatePayment(ctx, order.Id, userRes.Id, order.Amount, method)
 	if err != nil {
 		return "", fmt.Errorf("创建支付失败: %v", err)
@@ -87,7 +90,7 @@ func (osi *orderServiceImpl) Pay(ctx *gin.Context, method int, orderId string) (
 		return "", errors.New("未知支付错误！")
 	}
 	order.Status = domain.OrderStatusPaid
-	err = initializers.DB.Save(&order).Error
+	err = osi.repo.Updata(order)
 	if err != nil {
 		return "", err
 	}

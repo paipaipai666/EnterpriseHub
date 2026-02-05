@@ -1,8 +1,12 @@
 package repository
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/paipaipai666/EnterpriseHub/user-service/initializers"
+	"github.com/paipaipai666/EnterpriseHub/user-service/internal/cache"
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/model"
 )
 
@@ -15,10 +19,14 @@ type UserRepository interface {
 	UpdateUser(id, username, password, email string) error
 }
 
-type userRepositoryImpl struct{}
+type userRepositoryImpl struct {
+	cache *cache.UserCache
+}
 
 func NewUserRepository() UserRepository {
-	return &userRepositoryImpl{}
+	return &userRepositoryImpl{
+		cache: cache.NewUserCache(),
+	}
 }
 
 func (uri *userRepositoryImpl) CreateUser(username, password, email string) (string, error) {
@@ -44,18 +52,54 @@ func (uri *userRepositoryImpl) FindByParam(username, password string) *model.Use
 }
 
 func (uri *userRepositoryImpl) FindByUsername(username string) (*model.User, error) {
-	user := &model.User{}
-	err := initializers.DB.Where(&model.User{Username: username}).First(&user).Error
+	// 查缓存
+	user, err := uri.cache.GetUserByUsername(context.Background(), username)
 	if err != nil {
 		return nil, err
+	}
+	if user != nil {
+		fmt.Println("----------find in cache!----------")
+		return user, nil
+	}
+
+	user = &model.User{}
+	err = initializers.DB.Where(&model.User{Username: username}).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("----------find in database!----------")
+	if user != nil {
+		// 写缓存
+		err = uri.cache.SetUser(context.Background(), user)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return user, nil
 }
 
 func (uri *userRepositoryImpl) FindById(id string) *model.User {
-	user := &model.User{Id: id}
+	// 查缓存
+	user, err := uri.cache.GetUserById(context.Background(), id)
+	if err != nil {
+		return nil
+	}
+	if user != nil {
+		return user
+	}
+
+	// 查数据库
+	user = &model.User{Id: id}
 	initializers.DB.First(&user)
+	if user != nil {
+		// 写缓存
+		err = uri.cache.SetUser(context.Background(), user)
+		if err != nil {
+			return nil
+		}
+	}
 
 	return user
 }

@@ -14,21 +14,20 @@ import (
 func init() {
 	initializers.LoadEnv()
 	initializers.InitLogger("payment_service")
+	initializers.ConnectToRedis()
 	initializers.ConnectToDatabase()
 }
-
-var (
-	paymentRepo        repository.PaymentRepository = repository.NewPaymentRepository()
-	paymentGrpcHandler handler.PaymentGrpcHandler   = *handler.NewPaymentGrpcHandler(paymentRepo)
-)
 
 func main() {
 	startGrpcServer()
 }
 
 func startGrpcServer() {
+	paymentRepo := repository.NewPaymentRepository()
+	paymentGrpcHandler := handler.NewPaymentGrpcHandler(paymentRepo)
+
 	grpcServer := grpc.NewServer()
-	pb.RegisterPaymentServiceServer(grpcServer, &paymentGrpcHandler)
+	pb.RegisterPaymentServiceServer(grpcServer, paymentGrpcHandler)
 
 	address := "0.0.0.0:11001"
 	lis, err := net.Listen("tcp", address)

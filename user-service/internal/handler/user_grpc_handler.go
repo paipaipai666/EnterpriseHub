@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/pb"
 	"github.com/paipaipai666/EnterpriseHub/user-service/internal/repository"
@@ -21,6 +22,8 @@ func (ugh *UserGrpcHandler) GetUserByUsername(ctx context.Context, req *pb.GetUs
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("查询到的用户: ID=%s, Username=%s\n", user.Id, user.Username)
 
 	return &pb.UserResponse{
 		Id:       user.Id,

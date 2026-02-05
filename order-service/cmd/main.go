@@ -16,6 +16,7 @@ import (
 func init() {
 	initializers.LoadEnv()
 	initializers.InitLogger("order_service")
+	initializers.ConnectToRedis()
 	initializers.ConnectToDatabase()
 	initializers.ConnectToRabbitMQ()
 }

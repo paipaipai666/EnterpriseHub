@@ -18,23 +18,23 @@ import (
 func init() {
 	initializers.LoadEnv()
 	initializers.InitLogger("user_service")
+	initializers.ConnectToRedis()
 	initializers.ConnectToDatabase()
 }
 
-var (
-	userRepo        repository.UserRepository = repository.NewUserRepository()
-	userService     service.UserService       = service.NewUserService(userRepo)
-	userController  api.UserController        = api.NewUserController(userService)
-	userGrpcHandler handler.UserGrpcHandler   = *handler.NewUserGrpcHandler(userRepo)
-)
-
 func main() {
-	go startGrpcServer()
+	// 在所有初始化完成后才创建服务实例
+	userRepo := repository.NewUserRepository()
+	userService := service.NewUserService(userRepo)
+	userController := api.NewUserController(userService)
+	userGrpcHandler := *handler.NewUserGrpcHandler(userRepo)
 
-	startHttpServer()
+	go startGrpcServer(userGrpcHandler)
+
+	startHttpServer(userController)
 }
 
-func startGrpcServer() {
+func startGrpcServer(userGrpcHandler handler.UserGrpcHandler) {
 	grpcServer := grpc.NewServer()
 	pb.RegisterUserServiceServer(grpcServer, &userGrpcHandler)
 
@@ -50,7 +50,7 @@ func startGrpcServer() {
 	}
 }
 
-func startHttpServer() {
+func startHttpServer(userController api.UserController) {
 	router := gin.New()
 
 	router.Use(gin.Recovery())

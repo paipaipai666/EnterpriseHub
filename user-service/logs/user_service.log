@@ -1,1 +1,29 @@
 {"level":"INFO","ts":"2026-02-04 16:58:48","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:24:04","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"FATAL","ts":"2026-02-05 15:24:04","caller":"initializers/cache.go:17","msg":"REDIS_ADDR 环境变量未设置"}
+{"level":"INFO","ts":"2026-02-05 15:25:39","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"FATAL","ts":"2026-02-05 15:25:39","caller":"initializers/cache.go:17","msg":"REDIS_ADDR 环境变量未设置"}
+{"level":"INFO","ts":"2026-02-05 15:26:09","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:26:09","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:26:09","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:27:16","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:27:16","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:27:16","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:35:53","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:35:53","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:35:53","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:38:51","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:38:51","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:38:51","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:41:15","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:41:15","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:41:15","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:43:18","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:43:18","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:43:18","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:43:54","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 15:43:54","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 15:43:54","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 16:45:21","caller":"initializers/logger.go:41","msg":"Zap 日志初始化完成！"}
+{"level":"INFO","ts":"2026-02-05 16:45:22","caller":"initializers/cache.go:30","msg":"Redis数据库连接成功"}
+{"level":"INFO","ts":"2026-02-05 16:45:22","caller":"initializers/database.go:40","msg":"MySQL数据库连接成功"}
